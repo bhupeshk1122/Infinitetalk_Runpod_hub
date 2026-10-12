@@ -4,15 +4,13 @@
     "type": "serverless",
     "category": "video",
     "iconUrl": "https://github.com/wlsdml1114/Engui_Studio/blob/main/assets/logo.png?raw=true",
-  
     "config": {
-      "runsOn": "GPU",
-      "containerDiskInGb": 280,
-  
-      "gpuCount": 1,
-      "gpuIds": "ADA_24,ADA_32_PRO",
-      "allowedCudaVersions": [
-        "12.8"
-      ]
+        "runsOn": "GPU",
+        "containerDiskInGb": 280,
+        "gpuCount": 1,
+        "gpuIds": "AMPERE_24,ADA_24,ADA_32_PRO",
+        "allowedCudaVersions": [
+            "12.8"
+        ]
     }
 }

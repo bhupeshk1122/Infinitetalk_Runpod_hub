@@ -26,6 +26,8 @@ def truncate_base64_for_log(base64_str, max_length=50):
     return f"{base64_str[:max_length]}... (총 {len(base64_str)} 문자)"
 
 
+DEFAULT_BLOCKS_TO_SWAP = int(os.getenv("BLOCKS_TO_SWAP", "40"))
+DEFAULT_ATTENTION_MODE = os.getenv("ATTENTION_MODE", "sdpa")
 server_address = os.getenv("SERVER_ADDRESS", "127.0.0.1")
 client_id = str(uuid.uuid4())
 
@@ -403,6 +405,18 @@ def handler(job):
         logger.info(f"두 번째 오디오 경로: {wav_path_2}")
 
     prompt = load_workflow(workflow_path)
+
+    # ---- [3090 patch] VRAM / attention overrides --------------------------------
+    _bts = job_input.get("blocks_to_swap", DEFAULT_BLOCKS_TO_SWAP)
+    _attn = job_input.get("attention_mode", DEFAULT_ATTENTION_MODE)
+    for _nid, _node in prompt.items():
+        _ct = _node.get("class_type")
+        if _ct == "WanVideoBlockSwap" and _bts is not None:
+            _node["inputs"]["blocks_to_swap"] = max(0, min(int(_bts), 40))
+        if _ct == "WanVideoModelLoader" and _attn:
+            _node["inputs"]["attention_mode"] = str(_attn)
+    logger.info(f"[3090 patch] blocks_to_swap={_bts} attention_mode={_attn}")
+    # ------------------------------------------------------------------------------
 
     # ------------------------------------------------------------------
     # 동적 Force Offload 설정
